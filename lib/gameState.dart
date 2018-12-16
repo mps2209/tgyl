@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'plant.dart';
 class GameInfoInherited extends InheritedWidget {
   GameInfoInherited({
     Key key,
@@ -14,6 +14,7 @@ class GameInfoInherited extends InheritedWidget {
     return true;
   }
 }
+
 
 class GameInfo extends StatefulWidget {
   GameInfo({
@@ -40,7 +41,7 @@ class GameInfoState extends State<GameInfo>{
 
   int boardwidth;
   int boardheight;
-  List<TileType> gameBoard;
+  List<Tile> gameBoard;
 
   @override initState(){
     super.initState();
@@ -69,20 +70,21 @@ class GameInfoState extends State<GameInfo>{
     int defaultHeight=7;
     defaultHeight??=boardheight;
     defaultWidth??=boardwidth;
-    gameBoard = new List.generate(defaultWidth*defaultHeight, (_) => TileType.tillable);
+    gameBoard = new List.generate(defaultWidth*defaultHeight, (_) => Tile(TileType.tillable));
     this.boardwidth=defaultWidth;
     this.boardheight=defaultHeight;
   }
-  List<TileType> getGameBoard(){
+
+  List<Tile> getGameBoard(){
     return gameBoard;
   }
 
-  setTile(int index, TileType tile){
+  setTile(int index, Tile tile){
     setState(() {
       this.gameBoard[index]=tile;
     });
   }
-  _setGameBoard(List<TileType> newGameBoard){
+  _setGameBoard(List<Tile> newGameBoard){
     setState(() {
       this.gameBoard = newGameBoard;
     });
@@ -101,4 +103,15 @@ class GameInfoState extends State<GameInfo>{
       child: widget.child,
     );
   }
+}
+
+
+
+class Tile{
+
+  TileType type;
+  Plant plant;
+  bool harvestable=false;
+  Tile(this.type);
+
 }

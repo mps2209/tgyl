@@ -3,6 +3,7 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'dart:math';
 import 'gameState.dart';
 import 'const.dart';
+import 'plant.dart';
 
 void main() => runApp(MyApp());
 
@@ -103,72 +104,75 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _getTile(int index) {
     final GameInfoState state = GameInfo.of(context);
-    return Container(
+    Tile tile =state.getGameBoard()[index];
+    return new Container(
       child:
-          state.getGameBoard()[index] == TileType.planted ? Plant(index) : null,
+          state.getGameBoard()[index].type == TileType.planted ? new Plant(index) : null,
       decoration: new BoxDecoration(
-        color: _getColor(state.getGameBoard()[index]),
+        color: _getColor(state.getGameBoard()[index].type),
         border: new Border.all(color: Colors.greenAccent),
       ),
     );
+
   }
 
   _tileTapped(int index) {
     final GameInfoState state = GameInfo.of(context);
     var gameBoard = state.getGameBoard();
-    int newTileValue = gameBoard[index].index + 1;
+    int newTileValue = gameBoard[index].type.index + 1;
     if (newTileValue >= TileType.values.length) {
       newTileValue = 0;
     }
-    TileType changedTile = _getTileAfterAction(gameBoard[index]);
+    Tile changedTile = _getTileAfterAction(gameBoard[index]);
     state.setTile(index, changedTile);
   }
 
-  _getTileAfterAction(TileType tile) {
+  _getTileAfterAction(Tile tile) {
 //    const List<String> tools = ['till', 'dig', 'plaster', 'build','plant'];
-
+    TileType newtype = tile.type;
     switch (tools[_selectedTool]) {
       case 'till':
-        if (tile == TileType.tillable) {
-          return TileType.tilled;
+        if (tile.type == TileType.tillable) {
+          newtype = TileType.tilled;
         }
-        if (tile == TileType.tilled) {
-          return TileType.tillable;
+        if (tile.type== TileType.tilled) {
+          newtype = TileType.tillable;
         }
         break;
       case 'dig':
-        if (tile == TileType.tillable) {
-          return TileType.water;
+        if (tile.type== TileType.tillable) {
+          newtype = TileType.water;
         }
-        if (tile == TileType.water) {
-          return TileType.tillable;
+        if (tile.type== TileType.water) {
+          newtype = TileType.tillable;
         }
         break;
       case 'plaster':
-        if (tile == TileType.tillable) {
-          return TileType.path;
+        if (tile.type == TileType.tillable) {
+          newtype =  TileType.path;
         }
-        if (tile == TileType.path) {
-          return TileType.tillable;
+        if (tile.type == TileType.path) {
+          newtype =  TileType.tillable;
         }
         break;
       case 'build':
-        if (tile == TileType.tillable) {
-          return TileType.occupied;
+        if (tile.type== TileType.tillable) {
+          newtype =  TileType.occupied;
         }
-        if (tile == TileType.occupied) {
-          return TileType.tillable;
+        if (tile.type== TileType.occupied) {
+          newtype =  TileType.tillable;
         }
         break;
       case 'plant':
-        if (tile == TileType.tilled) {
-          return TileType.planted;
+        if (tile.type== TileType.tilled) {
+          newtype = TileType.planted;
         }
-        if (tile == TileType.planted) {
-          return TileType.tillable;
+        if (tile.type == TileType.planted && tile.harvestable) {
+          newtype =  TileType.tillable;
         }
         break;
     }
+    tile.type=newtype;
     return tile;
   }
 
@@ -194,72 +198,5 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
     }
     return null;
-  }
-}
-
-class Plant extends StatefulWidget {
-  int tileIndex;
-  Plant(int this.tileIndex);
-  @override
-  State<StatefulWidget> createState() => PlantState(tileIndex);
-}
-
-class PlantState extends State<Plant> with TickerProviderStateMixin {
-  AnimationController controller;
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 15),
-    );
-  }
-
-  String get timerString {
-    Duration duration = controller.duration * controller.value;
-    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
-  }
-
-  int _tileIndex;
-  PlantState(int this._tileIndex);
-  String _currentAnim = "left";
-  bool _isAnimating;
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return new FlareActor("assets/plantforthandback.flr",
-        alignment: Alignment.center,
-        fit: BoxFit.contain,
-        animation: _currentAnim, callback: (string) {
-      _isAnimating = false;
-      debugPrint(string);
-      String nextAnim;
-      var rnd = new Random();
-      if (rnd.nextBool()) {
-        print(timerString);
-//        print("next left");
-        if (string == "left") {
-          setState(() {
-            _currentAnim = "leftlast";
-          });
-        } else {
-          setState(() {
-            _currentAnim = "left";
-          });
-        }
-      } else {
-//        print("next right");
-
-        if (string == "right") {
-          setState(() {
-            _currentAnim = "rightlast";
-          });
-        } else {
-          setState(() {
-            _currentAnim = "right";
-          });
-        }
-      }
-    });
   }
 }
