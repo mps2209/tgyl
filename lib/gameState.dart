@@ -39,12 +39,14 @@ enum TileType{
 
 class GameInfoState extends State<GameInfo>{
 
+  int gold;
   int boardwidth;
   int boardheight;
   List<Tile> gameBoard;
 
   @override initState(){
     super.initState();
+    gold=10;
     initGameBoard();
   }
   setBoardwidth(int width){
@@ -52,6 +54,23 @@ class GameInfoState extends State<GameInfo>{
       this.boardwidth=width;
     });
   }
+
+  void addToGold(int earning){
+    setState(() {
+      gold+=earning;
+    });
+  }
+
+  bool substractFromGold(int cost){
+    if (gold<cost){
+      return false;
+    }
+    setState(() {
+      gold-=cost;
+    });
+    return true;
+  }
+
 
   setBoardheight(int height){
     setState(() {
@@ -70,7 +89,7 @@ class GameInfoState extends State<GameInfo>{
     int defaultHeight=7;
     defaultHeight??=boardheight;
     defaultWidth??=boardwidth;
-    gameBoard = new List.generate(defaultWidth*defaultHeight, (_) => Tile(TileType.tillable));
+    gameBoard = new List.generate(defaultWidth*defaultHeight, (index) => Tile(TileType.tillable,index));
     this.boardwidth=defaultWidth;
     this.boardheight=defaultHeight;
   }
@@ -108,10 +127,10 @@ class GameInfoState extends State<GameInfo>{
 
 
 class Tile{
-
+  int index;
   TileType type;
   Plant plant;
   bool harvestable=false;
-  Tile(this.type);
+  Tile(this.type,this.index);
 
 }

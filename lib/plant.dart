@@ -97,25 +97,22 @@ class PlantState extends State<Plant> with TickerProviderStateMixin {
     Widget widget;
     readyToHarvest ? widget= Container():
     widget= new Countdown(
-      animation: new StepTween(
-        begin: timeToGrow,
-        end: 0,
-      ).animate(controller),
+      countingDownFrom: timeToGrow,
+      animation: new CurvedAnimation(parent: controller, curve: Curves.linear),
     );
     return widget;
   }
 }
 
 class Countdown extends AnimatedWidget {
-  Countdown({Key key, this.animation}) : super(key: key, listenable: animation);
-  Animation<int> animation;
-
+  Countdown({Key key, this.animation, this.countingDownFrom}) : super(key: key, listenable: animation);
+  CurvedAnimation animation;
+  int countingDownFrom;
   @override
   build(BuildContext context) {
     return Center(
-      child: new Text(
-        animation.value.toString(),
-        style: new TextStyle(fontSize: 50.0),
+      child: new CircularProgressIndicator(
+        value: animation.value,
       ),
     );
   }

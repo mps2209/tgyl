@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flare_flutter/flare_actor.dart';
-import 'dart:math';
 import 'gameState.dart';
 import 'const.dart';
 import 'plant.dart';
@@ -12,6 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GameInfo(
       child: new MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: MyHomePage(),
       ),
     );
@@ -64,36 +63,35 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  _buildTools() {
-    return Row(
-      children: List.generate(tools.length, (index) {
-        return Expanded(
-          child: Container(
-            height: 70.0,
-            decoration: new BoxDecoration(
-                color: Colors.grey, border: Border.all(color: Colors.black)),
-            child: Center(
-                child: Text(
-              tools[index],
-            )),
-          ),
-        );
-      }),
-    );
-  }
+
 
   _buildGridView() {
     final GameInfoState state = GameInfo.of(context);
 
-    return GridView.count(
-      // Create a grid with 2 columns. If you change the scrollDirection to
-      // horizontal, this would produce 2 rows.
-      crossAxisCount: state.getBoardWidth(),
-      // Generate 100 Widgets that display their index in the List
-      children: List.generate(state.getBoardWidth() * state.getBoardHeigth(),
-          (index) {
-        return _buildTile(index);
-      }),
+    return Column(
+      children: <Widget>[
+        Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              new Container(
+                padding: EdgeInsets.only(top: 20.0),
+                child: new Text("Gold: " + state.gold.toString()),
+              )
+            ],
+        ),
+        Expanded(
+          child: GridView.count(
+            // Create a grid with 2 columns. If you change the scrollDirection to
+            // horizontal, this would produce 2 rows.
+            crossAxisCount: state.getBoardWidth(),
+            // Generate 100 Widgets that display their index in the List
+            children: List.generate(
+                state.getBoardWidth() * state.getBoardHeigth(), (index) {
+              return _buildTile(index);
+            }),
+          ),
+        )
+      ],
     );
   }
 
@@ -104,16 +102,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _getTile(int index) {
     final GameInfoState state = GameInfo.of(context);
-    Tile tile =state.getGameBoard()[index];
+    Tile tile = state.getGameBoard()[index];
     return new Container(
-      child:
-          state.getGameBoard()[index].type == TileType.planted ? new Plant(index) : null,
+      child: state.getGameBoard()[index].type == TileType.planted
+          ? new Plant(index)
+          : null,
       decoration: new BoxDecoration(
         color: _getColor(state.getGameBoard()[index].type),
         border: new Border.all(color: Colors.greenAccent),
       ),
     );
-
   }
 
   _tileTapped(int index) {
@@ -128,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _getTileAfterAction(Tile tile) {
+    final GameInfoState state = GameInfo.of(context);
 //    const List<String> tools = ['till', 'dig', 'plaster', 'build','plant'];
     TileType newtype = tile.type;
     switch (tools[_selectedTool]) {
@@ -135,44 +134,47 @@ class _MyHomePageState extends State<MyHomePage> {
         if (tile.type == TileType.tillable) {
           newtype = TileType.tilled;
         }
-        if (tile.type== TileType.tilled) {
+        if (tile.type == TileType.tilled) {
           newtype = TileType.tillable;
         }
         break;
       case 'dig':
-        if (tile.type== TileType.tillable) {
+        if (tile.type == TileType.tillable) {
           newtype = TileType.water;
         }
-        if (tile.type== TileType.water) {
+        if (tile.type == TileType.water) {
           newtype = TileType.tillable;
         }
         break;
       case 'plaster':
         if (tile.type == TileType.tillable) {
-          newtype =  TileType.path;
+          newtype = TileType.path;
         }
         if (tile.type == TileType.path) {
-          newtype =  TileType.tillable;
+          newtype = TileType.tillable;
         }
         break;
       case 'build':
-        if (tile.type== TileType.tillable) {
-          newtype =  TileType.occupied;
+        if (tile.type == TileType.tillable) {
+          newtype = TileType.occupied;
         }
-        if (tile.type== TileType.occupied) {
-          newtype =  TileType.tillable;
+        if (tile.type == TileType.occupied) {
+          newtype = TileType.tillable;
         }
         break;
       case 'plant':
-        if (tile.type== TileType.tilled) {
+        if (tile.type == TileType.tilled && state.substractFromGold(5)) {
           newtype = TileType.planted;
         }
         if (tile.type == TileType.planted && tile.harvestable) {
-          newtype =  TileType.tillable;
+          state.addToGold(10);
+          tile.harvestable=false;
+          state.setTile(tile.index, tile);
+          newtype = TileType.tillable;
         }
         break;
     }
-    tile.type=newtype;
+    tile.type = newtype;
     return tile;
   }
 
