@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'plant.dart';
+import 'dart:math';
+
 class GameInfoInherited extends InheritedWidget {
   GameInfoInherited({
     Key key,
@@ -43,7 +45,7 @@ class GameInfoState extends State<GameInfo>{
   int boardwidth;
   int boardheight;
   List<Tile> gameBoard;
-
+  bool showTools =false;
   @override initState(){
     super.initState();
     gold=10;
@@ -55,6 +57,12 @@ class GameInfoState extends State<GameInfo>{
     });
   }
 
+
+  switchShowTools(){
+    setState(() {
+      showTools=!showTools;
+    });
+  }
   void addToGold(int earning){
     setState(() {
       gold+=earning;
@@ -127,10 +135,28 @@ class GameInfoState extends State<GameInfo>{
 
 
 class Tile{
+  double chanceToLvlUp=0.5;
+  int tileLevel=1;
+  int gold=10;
+  int cost=5;
   int index;
   TileType type;
   Plant plant;
   bool harvestable=false;
   Tile(this.type,this.index);
 
+  checkLvlUp(){
+    var chance= new Random();
+    double d = chance.nextDouble();
+    print(d.toString());
+    if (d > chanceToLvlUp){
+      tileLevel++;
+      chanceToLvlUp=chanceToLvlUp/2;
+      cost= (cost*1.2).ceil();
+      gold=(gold*1.5).ceil();
+    }
+  }
+  int getGold(){
+    return gold;
+  }
 }

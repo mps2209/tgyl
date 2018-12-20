@@ -10,6 +10,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GameInfo(
       child: new MaterialApp(
+        theme: ThemeData(
+          // Define the default Brightness and Colors
+          brightness: Brightness.dark,
+          primaryColor: Colors.lightBlue[800],
+          accentColor: Colors.cyan[600],
+
+          // Define the default Font Family
+          fontFamily: 'Montserrat',
+
+          // Define the default TextTheme. Use this to specify the default
+          // text styling for headlines, titles, bodies of text, and more.
+          textTheme: TextTheme(
+            headline: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+            title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+            body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+          ),
+        ),
         debugShowCheckedModeBanner: false,
         home: MyHomePage(),
       ),
@@ -23,6 +40,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool showTools = false;
+
   int _selectedTool = 0;
   @override
   initState() {
@@ -31,16 +50,42 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: new Theme(
-          data: Theme.of(context).copyWith(
-            canvasColor: Colors.black,
-            primaryColor: Colors.white,
-            disabledColor: Colors.grey,
-          ),
-          child: _buildToolBar()),
-      body: _buildGridView(),
+    return Stack(
+      children: <Widget>[
+        _buildGridView(),
+        _buildUI(),
+      ],
     );
+  }
+
+  _buildUI() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        _buildInfoBar(),
+        new Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(),
+            )
+          ],
+        ),
+        _buildToolBar()
+      ],
+    );
+  }
+
+  _buildToolButton() {
+    return GestureDetector(
+      child: Icon(icons[_selectedTool]),
+      onTap: _settingsTapped(),
+    );
+  }
+
+  _settingsTapped() {
+    setState(() {
+      showTools = !showTools;
+    });
   }
 
   _buildToolBar() {
@@ -63,22 +108,32 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
+  _buildInfoBar() {
+    final GameInfoState state = GameInfo.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        new Container(
+          margin: EdgeInsets.all(20.0),
+          padding: EdgeInsets.only(top: 20.0),
+          child: new Text(
+            "Gold: " + state.gold.toString(),
+            style: new TextStyle(
+              fontSize: 18.0,
+              color: Colors.black,
+              fontStyle: FontStyle.normal,
+            ),
+          ),
+        )
+      ],
+    );
+  }
 
   _buildGridView() {
     final GameInfoState state = GameInfo.of(context);
 
     return Column(
       children: <Widget>[
-        Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              new Container(
-                padding: EdgeInsets.only(top: 20.0),
-                child: new Text("Gold: " + state.gold.toString()),
-              )
-            ],
-        ),
         Expanded(
           child: GridView.count(
             // Create a grid with 2 columns. If you change the scrollDirection to
@@ -90,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
               return _buildTile(index);
             }),
           ),
-        )
+        ),
       ],
     );
   }
@@ -107,10 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: state.getGameBoard()[index].type == TileType.planted
           ? new Plant(index)
           : null,
-      decoration: new BoxDecoration(
-        color: _getColor(state.getGameBoard()[index].type),
-        border: new Border.all(color: Colors.greenAccent),
-      ),
+      decoration: _getColor(state.getGameBoard()[index]),
     );
   }
 
@@ -167,36 +219,55 @@ class _MyHomePageState extends State<MyHomePage> {
           newtype = TileType.planted;
         }
         if (tile.type == TileType.planted && tile.harvestable) {
-          state.addToGold(10);
-          tile.harvestable=false;
-          state.setTile(tile.index, tile);
+          state.addToGold(tile.getGold());
+          tile.harvestable = false;
           newtype = TileType.tillable;
+          tile.checkLvlUp();
         }
         break;
     }
     tile.type = newtype;
+    state.setTile(tile.index, tile);
     return tile;
   }
 
-  Color _getColor(TileType tile) {
-    switch (tile) {
+  BoxDecoration _getColor(Tile tile) {
+    switch (tile.type) {
       case TileType.water:
-        return Colors.blue;
+        return new BoxDecoration(
+          color: Colors.blue,
+          border: new Border.all(color: Colors.blueAccent),
+        );
         break;
       case TileType.occupied:
-        return Colors.red;
+        return new BoxDecoration(
+          color: Colors.red,
+          border: new Border.all(color: Colors.redAccent),
+        );
         break;
       case TileType.path:
-        return Colors.grey;
+        return new BoxDecoration(
+          color: Colors.grey,
+          border: new Border.all(color: Colors.blueGrey),
+        );
         break;
       case TileType.tilled:
-        return Colors.brown;
+        return new BoxDecoration(
+          color: Colors.brown,
+          border: new Border.all(color: Colors.black),
+        );
         break;
       case TileType.tillable:
-        return Colors.green;
+        return new BoxDecoration(
+          color: Colors.green,
+          border: new Border.all(color: Colors.greenAccent),
+        );
         break;
       case TileType.planted:
-        return Colors.brown;
+        return new BoxDecoration(
+          color: Colors.brown,
+          border: new Border.all(color: Colors.black),
+        );
         break;
     }
     return null;
