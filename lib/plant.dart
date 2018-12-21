@@ -3,6 +3,7 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'dart:math';
 import 'gameState.dart';
 import 'const.dart';
+import 'tile.dart';
 
 class Plant extends StatefulWidget {
   int tileIndex;

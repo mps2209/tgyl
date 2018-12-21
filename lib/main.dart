@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'gameState.dart';
 import 'const.dart';
 import 'plant.dart';
+import 'package:flutter/animation.dart';
+import 'tile.dart';
 
 void main() => runApp(MyApp());
 
@@ -42,7 +44,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool showTools = false;
 
+
   int _selectedTool = 0;
+
   @override
   initState() {
     super.initState();
@@ -50,11 +54,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        _buildGridView(),
-        _buildUI(),
-      ],
+    return Scaffold(
+      appBar: null,
+      body: Stack(
+        children: <Widget>[
+          _buildGridView(),
+          _buildUI(),
+        ],
+      ),
     );
   }
 
@@ -120,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
             "Gold: " + state.gold.toString(),
             style: new TextStyle(
               fontSize: 18.0,
-              color: Colors.black,
+              color: Colors.yellow,
               fontStyle: FontStyle.normal,
             ),
           ),
@@ -128,6 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
   }
+
 
   _buildGridView() {
     final GameInfoState state = GameInfo.of(context);
@@ -158,21 +166,15 @@ class _MyHomePageState extends State<MyHomePage> {
   _getTile(int index) {
     final GameInfoState state = GameInfo.of(context);
     Tile tile = state.getGameBoard()[index];
-    return new Container(
-      child: state.getGameBoard()[index].type == TileType.planted
-          ? new Plant(index)
-          : null,
-      decoration: _getColor(state.getGameBoard()[index]),
-    );
+    return tile.getTileContainer();
   }
 
   _tileTapped(int index) {
+
+    print("TileTapped");
     final GameInfoState state = GameInfo.of(context);
     var gameBoard = state.getGameBoard();
-    int newTileValue = gameBoard[index].type.index + 1;
-    if (newTileValue >= TileType.values.length) {
-      newTileValue = 0;
-    }
+
     Tile changedTile = _getTileAfterAction(gameBoard[index]);
     state.setTile(index, changedTile);
   }
@@ -181,8 +183,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final GameInfoState state = GameInfo.of(context);
 //    const List<String> tools = ['till', 'dig', 'plaster', 'build','plant'];
     TileType newtype = tile.type;
-    switch (tools[_selectedTool]) {
-      case 'till':
+    switch (tools[_selectedTool].toLowerCase()) {
+      case 'beet':
         if (tile.type == TileType.tillable) {
           newtype = TileType.tilled;
         }
@@ -190,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
           newtype = TileType.tillable;
         }
         break;
-      case 'dig':
+      case 'fluss':
         if (tile.type == TileType.tillable) {
           newtype = TileType.water;
         }
@@ -198,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
           newtype = TileType.tillable;
         }
         break;
-      case 'plaster':
+      case 'weg':
         if (tile.type == TileType.tillable) {
           newtype = TileType.path;
         }
@@ -206,16 +208,17 @@ class _MyHomePageState extends State<MyHomePage> {
           newtype = TileType.tillable;
         }
         break;
-      case 'build':
-        if (tile.type == TileType.tillable) {
+      case 'dekoration':
+        if (tile.type == TileType.tillable && state.addToGold(tile.cost*2)) {
           newtype = TileType.occupied;
         }
         if (tile.type == TileType.occupied) {
           newtype = TileType.tillable;
+          state.addToGold((tile.cost*2).abs());
         }
         break;
-      case 'plant':
-        if (tile.type == TileType.tilled && state.substractFromGold(5)) {
+      case 'pflanzen':
+        if (tile.type == TileType.tilled && state.addToGold(tile.cost)) {
           newtype = TileType.planted;
         }
         if (tile.type == TileType.planted && tile.harvestable) {
@@ -227,49 +230,8 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
     }
     tile.type = newtype;
-    state.setTile(tile.index, tile);
     return tile;
   }
 
-  BoxDecoration _getColor(Tile tile) {
-    switch (tile.type) {
-      case TileType.water:
-        return new BoxDecoration(
-          color: Colors.blue,
-          border: new Border.all(color: Colors.blueAccent),
-        );
-        break;
-      case TileType.occupied:
-        return new BoxDecoration(
-          color: Colors.red,
-          border: new Border.all(color: Colors.redAccent),
-        );
-        break;
-      case TileType.path:
-        return new BoxDecoration(
-          color: Colors.grey,
-          border: new Border.all(color: Colors.blueGrey),
-        );
-        break;
-      case TileType.tilled:
-        return new BoxDecoration(
-          color: Colors.brown,
-          border: new Border.all(color: Colors.black),
-        );
-        break;
-      case TileType.tillable:
-        return new BoxDecoration(
-          color: Colors.green,
-          border: new Border.all(color: Colors.greenAccent),
-        );
-        break;
-      case TileType.planted:
-        return new BoxDecoration(
-          color: Colors.brown,
-          border: new Border.all(color: Colors.black),
-        );
-        break;
-    }
-    return null;
-  }
 }
+
