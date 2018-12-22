@@ -210,9 +210,11 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       case 'dekoration':
         if (tile.type == TileType.tillable && state.addToGold(tile.cost*2)) {
+          tile.bonusgiven=50;
           newtype = TileType.occupied;
         }
         if (tile.type == TileType.occupied) {
+          tile.bonusgiven=-50;
           newtype = TileType.tillable;
           state.addToGold((tile.cost*2).abs());
         }
@@ -222,10 +224,10 @@ class _MyHomePageState extends State<MyHomePage> {
           newtype = TileType.planted;
         }
         if (tile.type == TileType.planted && tile.harvestable) {
+          tile.checkLvlUp();
           state.addToGold(tile.getGold());
           tile.harvestable = false;
           newtype = TileType.tillable;
-          tile.checkLvlUp();
         }
         break;
     }
