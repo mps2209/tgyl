@@ -4,7 +4,7 @@ import 'const.dart';
 import 'plant.dart';
 import 'package:flutter/animation.dart';
 import 'tile.dart';
-
+import 'welcomePage.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -30,11 +30,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: MyHomePage(),
+        home: WelcomePage(),
       ),
     );
   }
 }
+
+
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -193,28 +195,30 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         break;
       case 'fluss':
-        if (tile.type == TileType.tillable) {
+        if (tile.type == TileType.tillable && state.addToGold(-5)) {
           newtype = TileType.water;
         }
         if (tile.type == TileType.water) {
+          state.addToGold(5);
           newtype = TileType.tillable;
         }
         break;
       case 'weg':
-        if (tile.type == TileType.tillable) {
+        if (tile.type == TileType.tillable && state.addToGold(-5)) {
           newtype = TileType.path;
         }
         if (tile.type == TileType.path) {
+          state.addToGold(5);
           newtype = TileType.tillable;
         }
         break;
       case 'dekoration':
         if (tile.type == TileType.tillable && state.addToGold(tile.cost*2)) {
-          tile.bonusgiven=50;
+          tile.bonusgiven=(50*((tile.cost*2).abs()/10)).ceil();
           newtype = TileType.occupied;
         }
         if (tile.type == TileType.occupied) {
-          tile.bonusgiven=-50;
+          tile.bonusgiven= -tile.bonusgiven;
           newtype = TileType.tillable;
           state.addToGold((tile.cost*2).abs());
         }

@@ -44,6 +44,7 @@ class Tile extends StatelessWidget {
             color: Colors.blue,
             border: Border.all(color: Colors.greenAccent),
           ),
+          child: Center(child: new Cost(-5,0)),
         );
         break;
       case TileType.occupied:
@@ -71,6 +72,9 @@ class Tile extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.grey,
             border: Border.all(color: Colors.greenAccent),
+          ),
+          child: Center(
+            child: Cost(-5,0),
           ),
         );
         break;
@@ -183,10 +187,10 @@ class CostState extends State<Cost> with TickerProviderStateMixin {
         ),
       ),
     )..addListener(() {
-        setState(() {
-          // the state that has changed here is the animation object’s value
-        });
+      setState(() {
+        // the state that has changed here is the animation object’s value
       });
+    });
     controller.forward();
   }
 

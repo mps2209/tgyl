@@ -8,6 +8,6 @@ enum TileType{
 enum HimmelsRichtung{
   Norden,Osten,Sueden,Westen
 }
-const List<String> tools = ['Beet', 'Fluss', 'Weg', 'Dekoration','Pflanzen'];
+const List<String> tools = ['Beet','Pflanzen', 'Dekoration', 'Fluss', 'Weg'];
 
-const List<IconData> icons=[Icons.restaurant,Icons.pool,Icons.drive_eta,Icons.build,Icons.spa];
+const List<IconData> icons=[Icons.restaurant,Icons.spa,Icons.build,Icons.pool, Icons.drive_eta];

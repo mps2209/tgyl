@@ -3,6 +3,8 @@ import 'plant.dart';
 import 'dart:math';
 import 'tile.dart';
 import 'const.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class GameInfoInherited extends InheritedWidget {
   GameInfoInherited({
@@ -38,11 +40,13 @@ class GameInfo extends StatefulWidget {
 }
 
 class GameInfoState extends State<GameInfo> {
+
   int gold;
   int boardwidth;
   int boardheight;
   List<Tile> gameBoard;
   bool showTools = false;
+  bool doneTutorial=false;
   @override
   initState() {
     super.initState();
@@ -50,6 +54,12 @@ class GameInfoState extends State<GameInfo> {
     initGameBoard();
   }
 
+
+  setTutorial(bool isdone){
+    setState(() {
+      doneTutorial=isdone;
+    });
+  }
   setBoardwidth(int width) {
     setState(() {
       this.boardwidth = width;
